@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contador Regresivo Pro</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #07070D; font-family: 'Inter', sans-serif;
+            overflow: hidden; display: flex; justify-content: center; align-items: center;
+        }
+
+        .info-btn {
+            position: absolute; top: 15px; right: 15px;
+            background-color: #010112; color: #A0A0A0;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 3px; padding: 4px 10px;
+            font-size: 0.65rem; cursor: pointer;
+            transition: all 0.3s ease; text-transform: uppercase;
+            letter-spacing: 0.5px; z-index: 100;
+        }
+
+        .info-btn:hover { background-color: #101025; color: #FFFFFF; border-color: rgba(59, 56, 68, 0.2); }
+
+        .info-panel {
+            position: fixed; top: 15px; right: -320px;
+            width: 280px; height: calc(80vh - 30px);
+            background-color: rgba(1, 1, 18, 0.23);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 5px;
+            padding: 40px 20px; color: white;
+            transition: right 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 99;
+        }
+        
+        .info-panel.active { right: 15px; }
+        
+        #panelTitle { font-size: 1rem; color: #FFFFFF; margin-bottom: 10px; display: block; height: 1.2rem; }
+        .meta-info { font-size: 0.75rem; color: #888; margin-bottom: 20px; }
+        .meta-info div { margin-bottom: 5px; min-height: 1em; }
+        .online-green { color: #4CAF50; font-style: italic; }
+        #panelDesc { font-size: 0.8rem; color: #A0A0A0; line-height: 1.5; min-height: 4em; }
+
+        .gradient-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(150px); opacity: 0.45; }
+        .blob-1 { width: 550px; height: 550px; background: radial-gradient(circle, rgba(0, 34, 255, 0.65) 0%, rgba(0, 34, 255, 0) 70%); top: -5%; left: -5%; animation: slow-move-1 55s infinite ease-in-out; }
+        .blob-2 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(0, 34, 255, 0.65) 0%, rgba(0, 34, 255, 0) 70%); bottom: -10%; right: -5%; animation: slow-move-2 65s infinite ease-in-out; }
+        @keyframes slow-move-1 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(10vw, 10vh); } }
+        @keyframes slow-move-2 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-10vw, -10vh); } }
+
+        .container { position: relative; z-index: 1; text-align: center; width: 95%; max-width: 600px; }
+        .timer-row { display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .time-block { display: flex; flex-direction: column; align-items: center; }
+        .number-wrapper { display: flex; height: 2.6rem; overflow: hidden; }
+        .digit-slot { height: 2.6rem; width: 1.7rem; position: relative; overflow: hidden; }
+        .digit-track { display: flex; flex-direction: column; transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1); }
+        .digit-track span { height: 2.6rem; font-size: 2.4rem; color: #FFFFFF; }
+        .separator { 
+            font-size: 2.2rem; 
+            font-weight: 400; 
+            color: rgba(255, 255, 255, 0.2); 
+            height: 2.6rem; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin-top: -15px; /* <--- ESTE ES EL AJUSTE. Puedes hacerlo más negativo si quieres que suban más */
+            line-height: 1; 
+        }
+        .label { font-size: 0.41rem; text-transform: uppercase; color: rgba(255, 255, 255, 0.4); margin-top: 10px; }
+        .main-footer { margin-top: 25px; color: #9C2828; font-size: 0.7rem; text-transform: uppercase; font-weight: 600; }
+    </style>
+</head>
+<body>
+    
+    <button class="info-btn" id="infoTrigger">Info</button>
+
+    <div class="info-panel" id="infoPanel">
+        <h2 id="panelTitle"></h2>
+        <div class="meta-info" id="metaInfo">
+            <div id="dateField"></div>
+            <div id="statusField"></div>
+        </div>
+        <p id="panelDesc"></p>
+    </div>
+
+    <div class="gradient-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div class="container">
+        <div class="timer-row">
+            <div class="time-block"><div class="number-wrapper" id="mes"></div><div class="label">Meses</div></div>
+            <div class="separator">:</div>
+            <div class="time-block"><div class="number-wrapper" id="dia"></div><div class="label">Días</div></div>
+            <div class="separator">:</div>
+            <div class="time-block"><div class="number-wrapper" id="hor"></div><div class="label">Horas</div></div>
+            <div class="separator">:</div>
+            <div class="time-block"><div class="number-wrapper" id="min"></div><div class="label">Minutos</div></div>
+            <div class="separator">:</div>
+            <div class="time-block"><div class="number-wrapper" id="seg"></div><div class="label">Segundos</div></div>
+        </div>
+        <div class="main-footer">Antes del viaje escolar</div>
+    </div>
+
+    <script>
+        const btn = document.getElementById('infoTrigger');
+        const panel = document.getElementById('infoPanel');
+        const title = document.getElementById('panelTitle');
+        const dateField = document.getElementById('dateField');
+        const statusField = document.getElementById('statusField');
+        const desc = document.getElementById('panelDesc');
+        
+        const targetDate = new Date("2026-06-23T07:00:00").getTime();
+        const targetText = "Información";
+        const dateText = "Fecha: 23 de julio del 2026 7:00 am";
+        const statusText = "Estado: \"En curso\"";
+        const descText = "Evento que ocurria en unos dias, organizado por los padres y tutor del los alumnos del aula del 3°C de Secundaria del Colegio Santiago Apóstol. La fecha es aproximada.";
+        
+        let animationTimeouts = [];
+
+        btn.addEventListener('click', () => {
+            if(panel.classList.contains('active')) {
+                animationTimeouts.forEach(clearTimeout);
+                animationTimeouts = [];
+                if (window.titleInterval) clearInterval(window.titleInterval);
+                panel.classList.remove('active');
+            } else {
+                panel.classList.add('active');
+                title.innerText = "";
+                dateField.innerText = "";
+                statusField.innerText = "";
+                desc.innerText = "";
+                
+                animationTimeouts.push(setTimeout(() => {
+                    animateTitleRandom();
+                    animationTimeouts.push(setTimeout(() => {
+                        typeWriter(dateField, dateText, () => {
+                            typeWriter(statusField, statusText, () => {
+                                typeWriter(desc, descText);
+                            });
+                        });
+                    }, 800));
+                }, 200));
+            }
+        });
+
+        function typeWriter(element, text, callback) {
+            let i = 0;
+            function write() {
+                if (i < text.length) {
+                    if (text.includes("En curso")) {
+                        element.innerHTML = text.replace("En curso", '<span class="online-green">En curso</span>');
+                    } else {
+                        element.innerHTML += text.charAt(i);
+                    }
+                    i++;
+                    let timer = setTimeout(write, 20);
+                    animationTimeouts.push(timer);
+                } else if (callback) {
+                    callback();
+                }
+            }
+            write();
+        }
+
+        function animateTitleRandom() {
+            let indices = Array.from({length: targetText.length}, (_, i) => i);
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+            title.innerText = "*".repeat(targetText.length);
+            let solvedCount = 0;
+            window.titleInterval = setInterval(() => {
+                const chars = title.innerText.split("");
+                if (solvedCount < indices.length) {
+                    chars[indices[solvedCount]] = targetText[indices[solvedCount]];
+                    title.innerText = chars.join("");
+                    solvedCount++;
+                } else {
+                    clearInterval(window.titleInterval);
+                }
+            }, 700 / targetText.length);
+        }
+
+        const ids = ['mes', 'dia', 'hor', 'min', 'seg'];
+        const tracks = {}, lastDigits = {};
+
+        ids.forEach(id => {
+            const container = document.getElementById(id);
+            container.innerHTML = `<div class="digit-slot"><div class="digit-track"></div></div><div class="digit-slot"><div class="digit-track"></div></div>`;
+            const slotTracks = container.querySelectorAll('.digit-track');
+            slotTracks.forEach(track => {
+                let s = '';
+                for (let i = 9; i >= 0; i--) s += `<span>${i}</span>`;
+                track.innerHTML = s;
+            });
+            tracks[id] = slotTracks;
+        });
+
+        function updateTimer() {
+            let diff = targetDate - Date.now();
+            if (diff < 0) diff = 0;
+            const ms = { mth: 2631744000, day: 86400000, hr: 3600000, min: 60000, sec: 1000 };
+            const vals = {
+                mes: Math.floor(diff / ms.mth),
+                dia: Math.floor((diff % ms.mth) / ms.day),
+                hor: Math.floor((diff % ms.day) / ms.hr),
+                min: Math.floor((diff % ms.hr) / ms.min),
+                seg: Math.floor((diff % ms.min) / ms.sec)
+            };
+            Object.keys(vals).forEach(id => {
+                const str = vals[id].toString().padStart(2, '0');
+                tracks[id].forEach((track, i) => {
+                    track.style.transform = `translateY(-${(9 - parseInt(str[i])) * 10}%)`;
+                });
+            });
+            if (diff > 0) requestAnimationFrame(updateTimer);
+        }
+        requestAnimationFrame(updateTimer);
+    </script>
+</body>
+</html>
