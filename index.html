@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temporizador</title>
+    <title>Temporizador Doble</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +13,7 @@
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             background-color: #07070D; font-family: 'Inter', sans-serif;
-            overflow: hidden; display: flex; justify-content: center; align-items: center;
+            overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
 
         .info-btn {
@@ -55,13 +55,27 @@
         @keyframes slow-move-1 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(10vw, 10vh); } }
         @keyframes slow-move-2 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-10vw, -10vh); } }
 
-        .container { position: relative; z-index: 1; text-align: center; width: 95%; max-width: 600px; }
+        .container { position: relative; z-index: 1; text-align: center; width: 95%; max-width: 600px; margin-bottom: 20px; }
+        
+        /* Estilo especial para el segundo temporizador */
+        .small-timer { transform: scale(0.65); opacity: 0.8; margin-top: -20px; }
+
         .timer-row { display: flex; justify-content: center; align-items: center; gap: 10px; }
         .time-block { display: flex; flex-direction: column; align-items: center; }
         .number-wrapper { display: flex; height: 2.6rem; overflow: hidden; }
         .digit-slot { height: 2.6rem; width: 1.7rem; position: relative; overflow: hidden; }
         .digit-track { display: flex; flex-direction: column; transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1); }
+        
+        /* Color base para los números (afecta por defecto al segundo) */
         .digit-track span { height: 2.6rem; font-size: 2.4rem; color: #FFFFFF; }
+
+        /* ======================================================= */
+        /* CAMBIA AQUÍ EL COLOR DEL PRIMER TEMPORIZADOR */
+        .container:not(.small-timer) .digit-track span { 
+            color: #ed2626; /* <--- Pon aquí el color que quieras (Hex, RGB o nombre) */
+        }
+        /* ======================================================= */
+
         .separator { 
             font-size: 2.2rem; 
             font-weight: 400; 
@@ -70,11 +84,14 @@
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            margin-top: -15px; /* <--- ESTE ES EL AJUSTE. Puedes hacerlo más negativo si quieres que suban más */
+            margin-top: -15px; 
             line-height: 1; 
         }
         .label { font-size: 0.41rem; text-transform: uppercase; color: rgba(255, 255, 255, 0.4); margin-top: 10px; }
         .main-footer { margin-top: 25px; color: #9C2828; font-size: 0.7rem; text-transform: uppercase; font-weight: 600; }
+        
+        /* Ajuste de color para el pie del segundo temporizador */
+        .small-timer .main-footer { color: #666; margin-top: 15px;}
     </style>
 </head>
 <body>
@@ -97,17 +114,32 @@
 
     <div class="container">
         <div class="timer-row">
-            <div class="time-block"><div class="number-wrapper" id="mes"></div><div class="label">Meses</div></div>
+            <div class="time-block"><div class="number-wrapper" id="main-mes"></div><div class="label">Meses</div></div>
             <div class="separator">:</div>
-            <div class="time-block"><div class="number-wrapper" id="dia"></div><div class="label">Días</div></div>
+            <div class="time-block"><div class="number-wrapper" id="main-dia"></div><div class="label">Días</div></div>
             <div class="separator">:</div>
-            <div class="time-block"><div class="number-wrapper" id="hor"></div><div class="label">Horas</div></div>
+            <div class="time-block"><div class="number-wrapper" id="main-hor"></div><div class="label">Horas</div></div>
             <div class="separator">:</div>
-            <div class="time-block"><div class="number-wrapper" id="min"></div><div class="label">Minutos</div></div>
+            <div class="time-block"><div class="number-wrapper" id="main-min"></div><div class="label">Minutos</div></div>
             <div class="separator">:</div>
-            <div class="time-block"><div class="number-wrapper" id="seg"></div><div class="label">Segundos</div></div>
+            <div class="time-block"><div class="number-wrapper" id="main-seg"></div><div class="label">Segundos</div></div>
         </div>
         <div class="main-footer">Antes del viaje escolar</div>
+    </div>
+
+    <div class="container small-timer">
+        <div class="timer-row">
+            <div class="time-block"><div class="number-wrapper" id="sec-mes"></div><div class="label">Meses</div></div>
+            <div class="separator">:</div>
+            <div class="time-block"><div class="number-wrapper" id="sec-dia"></div><div class="label">Días</div></div>
+            <div class="separator">:</div>
+            <div class="time-block"><div class="number-wrapper" id="sec-hor"></div><div class="label">Horas</div></div>
+            <div class="separator">:</div>
+            <div class="time-block"><div class="number-wrapper" id="sec-min"></div><div class="label">Minutos</div></div>
+            <div class="separator">:</div>
+            <div class="time-block"><div class="number-wrapper" id="sec-seg"></div><div class="label">Segundos</div></div>
+        </div>
+        <div class="main-footer">7:30:00am por piero espacial xd (MAXIMO)</div>
     </div>
 
     <script>
@@ -118,11 +150,19 @@
         const statusField = document.getElementById('statusField');
         const desc = document.getElementById('panelDesc');
         
-        const targetDate = new Date("2026-06-23T07:00:00").getTime();
+        // --- FECHAS DE LOS TEMPORIZADORES ---
+        const mainTargetDate = new Date("2026-06-23T07:00:00").getTime();
+        const secTargetDate = new Date("2026-06-23T07:30:00").getTime(); 
+
+        const timersData = [
+            { prefix: 'main', target: mainTargetDate },
+            { prefix: 'sec', target: secTargetDate }
+        ];
+
         const targetText = "Información";
         const dateText = "Fecha: 23 de julio del 2026 7:00 am";
         const statusText = "Estado: \"En curso\"";
-        const descText = "Evento que ocurria en unos dias, organizado por los padres y tutor del los alumnos del aula del 3°C de Secundaria del Colegio Santiago Apóstol. La fecha es aproximada.";
+        const descText = "Evento que ocurria en unos dias, organized por los padres y tutor del los alumnos del aula del 3°C de Secundaria del Colegio Santiago Apóstol. La fecha es aproximada.";
         
         let animationTimeouts = [];
 
@@ -191,41 +231,55 @@
             }, 700 / targetText.length);
         }
 
-        const ids = ['mes', 'dia', 'hor', 'min', 'seg'];
-        const tracks = {}, lastDigits = {};
+        // Inicialización de las pistas de números
+        const units = ['mes', 'dia', 'hor', 'min', 'seg'];
+        const tracks = {};
 
-        ids.forEach(id => {
-            const container = document.getElementById(id);
-            container.innerHTML = `<div class="digit-slot"><div class="digit-track"></div></div><div class="digit-slot"><div class="digit-track"></div></div>`;
-            const slotTracks = container.querySelectorAll('.digit-track');
-            slotTracks.forEach(track => {
-                let s = '';
-                for (let i = 9; i >= 0; i--) s += `<span>${i}</span>`;
-                track.innerHTML = s;
+        timersData.forEach(timer => {
+            units.forEach(unit => {
+                const id = `${timer.prefix}-${unit}`;
+                const container = document.getElementById(id);
+                container.innerHTML = `<div class="digit-slot"><div class="digit-track"></div></div><div class="digit-slot"><div class="digit-track"></div></div>`;
+                const slotTracks = container.querySelectorAll('.digit-track');
+                slotTracks.forEach(track => {
+                    let s = '';
+                    for (let i = 9; i >= 0; i--) s += `<span>${i}</span>`;
+                    track.innerHTML = s;
+                });
+                tracks[id] = slotTracks;
             });
-            tracks[id] = slotTracks;
         });
 
-        function updateTimer() {
-            let diff = targetDate - Date.now();
-            if (diff < 0) diff = 0;
-            const ms = { mth: 2631744000, day: 86400000, hr: 3600000, min: 60000, sec: 1000 };
-            const vals = {
-                mes: Math.floor(diff / ms.mth),
-                dia: Math.floor((diff % ms.mth) / ms.day),
-                hor: Math.floor((diff % ms.day) / ms.hr),
-                min: Math.floor((diff % ms.hr) / ms.min),
-                seg: Math.floor((diff % ms.min) / ms.sec)
-            };
-            Object.keys(vals).forEach(id => {
-                const str = vals[id].toString().padStart(2, '0');
-                tracks[id].forEach((track, i) => {
-                    track.style.transform = `translateY(-${(9 - parseInt(str[i])) * 10}%)`;
+        // Actualización constante
+        function updateTimers() {
+            const now = Date.now();
+            
+            timersData.forEach(timer => {
+                let diff = timer.target - now;
+                if (diff < 0) diff = 0;
+                
+                const ms = { mth: 2631744000, day: 86400000, hr: 3600000, min: 60000, sec: 1000 };
+                const vals = {
+                    mes: Math.floor(diff / ms.mth),
+                    dia: Math.floor((diff % ms.mth) / ms.day),
+                    hor: Math.floor((diff % ms.day) / ms.hr),
+                    min: Math.floor((diff % ms.hr) / ms.min),
+                    seg: Math.floor((diff % ms.min) / ms.sec)
+                };
+                
+                Object.keys(vals).forEach(unit => {
+                    const id = `${timer.prefix}-${unit}`;
+                    const str = vals[unit].toString().padStart(2, '0');
+                    tracks[id].forEach((track, i) => {
+                        track.style.transform = `translateY(-${(9 - parseInt(str[i])) * 10}%)`;
+                    });
                 });
             });
-            if (diff > 0) requestAnimationFrame(updateTimer);
+            
+            requestAnimationFrame(updateTimers);
         }
-        requestAnimationFrame(updateTimer);
+        
+        requestAnimationFrame(updateTimers);
     </script>
 </body>
 </html>
