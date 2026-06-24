@@ -61,7 +61,7 @@
         .number-wrapper { display: flex; height: 2.6rem; overflow: hidden; }
         .digit-slot { height: 2.6rem; width: 1.7rem; position: relative; overflow: hidden; }
         .digit-track { display: flex; flex-direction: column; transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1); }
-        .digit-track span { height: 2.6rem; font-size: 2.4rem; color: #ed2626; }
+        .digit-track span { height: 2.6rem; font-size: 2.4rem; color: #ffffff; }
         .separator { 
             font-size: 2.2rem; 
             font-weight: 400; 
@@ -107,7 +107,7 @@
             <div class="separator">:</div>
             <div class="time-block"><div class="number-wrapper" id="seg"></div><div class="label">Segundos</div></div>
         </div>
-        <div class="main-footer">Antes del viaje escolar (MÁXIMO)</div>
+        <div class="main-footer">Antes de fin de año</div>
     </div>
 
     <script>
@@ -118,11 +118,11 @@
         const statusField = document.getElementById('statusField');
         const desc = document.getElementById('panelDesc');
         
-        const targetDate = new Date("2026-06-23T07:30:00").getTime();
+        const targetDate = new Date("2026-12-31T011:59:59").getTime();
         const targetText = "Información";
-        const dateText = "Fecha: 23 de julio del 2026 7:30 am";
+        const dateText = "Fecha: 31 de diciembre del 2026 11:59 am";
         const statusText = "Estado: \"En curso\"";
-        const descText = "Evento que ocurria en unos dias, organizado por los padres y tutor del los alumnos del aula del 3°C de Secundaria del Colegio Santiago Apóstol. La fecha es aproximada.";
+        const descText = "Año Nuevo";
         
         let animationTimeouts = [];
 
